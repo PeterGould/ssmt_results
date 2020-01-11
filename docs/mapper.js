@@ -118,7 +118,7 @@ point_layer.label = 'point_layer';
         });
         point_layer.addTo(map);
         //zoom to layer
-        if(point_layer.getLayers().length>0) map.fitBounds(point_layer.getBounds(),{maxZoom:12,padding:[50,50]});
+        if(point_layer.getLayers().length>0) map.fitBounds(point_layer.getBounds(),{maxZoom:8,padding:[50,50]});
     }
 };
 
