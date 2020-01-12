@@ -116,6 +116,25 @@ var datasets = false;
                                 }
                 datasets.push(new_group);
             })
+            //add lines
+            var line_data = models["pop_" + current_climate];
+            var line_coef = line_data.models[current_site][current_response+"10"];
+            var step = (line_data.max - line_data.min)/50;
+            var line_points = [];
+            for(var k = line_data.min; k < line_data.max;k+=step){
+                line_points.push({x:k,y:line_coef.a0 + line_coef.a1*k+line_coef.a2*k*k})
+            }
+            var line_dataset = {
+                label:"Model Fit"
+                ,data:line_points
+                ,type:"line"
+                ,fill:false
+                ,backgroundColor:'rgba(0,0,0,0.5)'
+                ,borderColor:'rgba(0,0,0,0.5)'
+                ,pointRadius:0
+                ,cubicInterpolationMode:'monotone'
+            }
+            datasets.push(line_dataset);
            publish_graph();
         }
 
