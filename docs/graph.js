@@ -80,8 +80,9 @@ var datasets = false;
                     Object.keys(site_data[a_site]).forEach(
                         function(pop_name){
                             var a_pop =site_data[a_site][pop_name];                          
-                            var hover_message = ["Pop: " + a_pop.pop,"Region: " + a_pop.region, "DBH: " + a_pop.dbh10
-                                                ,"Ht: " + a_pop.ht10, "Surv: " + a_pop.surv10,
+                            var hover_message = ["Pop: " + a_pop.pop,"Region: " + a_pop.region
+                                                ,"DBH: " + a_pop.dbh10
+                                                ,"Ht: " + a_pop.ht10, "Surv: " + a_pop.surv10
                                                 ,"Vol: " + a_pop.vol10, "VolYld: " + a_pop.volyld10
                                                 ,"Family 1: " + a_pop.fam1, " Elevation (m) " + a_pop.elev1
                                                 ,"Family 2: " + a_pop.fam2, " Elevation (m) " + a_pop.elev2
