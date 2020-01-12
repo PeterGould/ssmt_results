@@ -1,9 +1,11 @@
 
 var map = false;
 var point_grid = false;
+var family_layer = false;
 var point_layer = false;
 var BASELAYER_CHANGE = 'base_layer_change';
-var POPULATION_FOCUS = 'population_focus'
+var POPULATION_FOCUS = 'population_focus';
+var FAMILY_CLICK = 'family_click';
 var bases = { //basemap images
     Imagery:{
         url:'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
@@ -66,7 +68,9 @@ var show_blank_map = function(){
     });
     //add scalebar
     var sbar = L.control.scale({metric:true,imperial:false});
-    var map_callback = function(){   
+    var map_callback = function(){  
+        //add points
+        add_all_families(); 
         //add objects now
         pick_base.addTo(map);
         sbar.addTo(map);
@@ -81,6 +85,41 @@ var show_blank_map = function(){
     
 }
 
+//add all family locations
+var add_all_families  = function(){
+    var family_array = [];
+    Object.keys(locations).forEach(function(a_loc){
+        var a_fam = locations[a_loc]
+        var x = a_fam.lon
+        var y = a_fam.lat
+        var id = String(a_fam.family);
+        var color = region_colors[a_fam.region].hex_color;
+       family_array.push(turf.point([x,y],{name:id,id:id,color:color}));
+    });
+    var family_grid = turf.featureCollection(family_array);
+    turf.featureEach(family_grid,function(feature,index){
+        feature.family = feature.properties.name;
+        feature.color = feature.properties.color;
+    });
+    var family_layer = L.geoJson(family_grid, {
+        pointToLayer: function (feature, latlng) {
+             return new L.CircleMarker(latlng, {
+                        radius: 4
+                        ,weight:2
+                        ,fillColor:feature.color
+                        ,fillOpacity:1
+                        ,color:'black'
+                        ,stroke:true
+             })
+        },
+    });
+       //make points clickable
+  family_layer.on("click",function(e){
+    PubSub.publish(FAMILY_CLICK,{id:e.layer.feature.properties.id});
+});
+
+    family_layer.addTo(map);
+}
 //show points
 var show_points = function () {
     var plotColor = "#ff4230";
@@ -96,20 +135,16 @@ point_layer.label = 'point_layer';
    var pts = L.geoJson(point_grid, {
         pointToLayer: function (feature, latlng) {
              return new L.CircleMarker(latlng, {
-                        radius: 5
+                        radius: 6
                         ,weight:2
-                        ,fillColor:'red'
+                        ,fillColor:feature.color
                         ,fillOpacity:1
-                        ,color:'white'
+                        ,color:'black'
                         ,stroke:true
              })
         },
     });
-     //make points clickable
-  /*  point_layer.on("click",function(e){
-        PubSub.publish(MAP_POINT_CLICK,{id:e.layer.feature.properties.id});
-    });
-*/
+  
     point_layer.addLayer(pts);
     if(point_layer==null) return;
     if(map){
@@ -140,11 +175,13 @@ PubSub.subscribe(POPULATION_FOCUS,function(msd,data){
         var x = a_fam.lon
         var y = a_fam.lat
         var id = String(a_fam.family);
-        pt_array.push(turf.point([x,y],{name:id,id:id}));
+        var color = region_colors[a_fam.region].hex_color;
+        pt_array.push(turf.point([x,y],{name:id,id:id,color:color}));
     } 
     point_grid = turf.featureCollection(pt_array);
     turf.featureEach(point_grid,function(feature,index){
         feature.family = feature.properties.name;
+        feature.color = feature.properties.color;
     });
     show_points();
 

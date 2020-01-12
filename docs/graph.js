@@ -191,3 +191,35 @@ var datasets = false;
 
         } 
         
+        //listen for map point click
+        PubSub.subscribe(FAMILY_CLICK,function(msg,family_data){
+           //which region?
+            var region = locations[family_data.id].region;
+            var region_n = 0;
+            var family_n = 0;
+            var pop = false;
+            for(var k = 0; k<datasets.length;k++){
+                if(datasets[k].label==region){
+                    region_n = k;
+                    for(var j = 0; j<datasets[k].data.length;j++){
+                        if(parseInt(datasets[k].data[j].fam1)==parseInt(family_data.id)
+                        || parseInt(datasets[k].data[j].fam2)==parseInt(family_data.id)){
+                            family_n = j;
+                            pop = [String(datasets[k].data[j].fam1),String(datasets[k].data[j].fam2)];
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            var meta = graph.getDatasetMeta(region_n);
+            var rect = graph.chart.canvas.getBoundingClientRect();
+            point = meta.data[family_n].getCenterPoint(),
+            evt = new MouseEvent('mousemove', {
+              clientX: rect.left + point.x,
+              clientY: rect.top + point.y
+            });
+            var node = graph.chart.canvas;
+           node.dispatchEvent(evt);
+           if(pop) PubSub.publish(POPULATION_FOCUS,pop);
+        });
